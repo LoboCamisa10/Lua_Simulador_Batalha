@@ -1,7 +1,7 @@
 local monster = {}
 
 monster.Name = "Godzila"
-monster.descripition = "Monstro gigante com pele resistente!"
+monster.Description = "Monstro gigante com pele resistente!"
 monster.Maxhealth = 50
 monster.Health = 50
 monster.Attack = 4
