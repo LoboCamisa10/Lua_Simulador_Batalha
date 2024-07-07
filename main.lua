@@ -11,6 +11,13 @@ functions.enableUTF8()
 functions.printHeader()
 
 local boss = monster
+local jogador = player
 
 functions.printMonster(boss)
 
+
+print()
+print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
+print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
+print("========================")
+functions.LoopActions(boss, jogador)
