@@ -28,10 +28,11 @@ end
 ---@param attribute number Número 10
 ---@return string
 ---
-function functions.AttributeBar(attribute)
+function functions.AttributeBar(attribute, maxhealth)
     attribute = attribute or 10
+    maxhealth = maxhealth or 20
     local result = ""
-    for i = 0, 9, 1 do
+    for i = 1, maxhealth, 1 do
         if i <= attribute then
             result = result .. "■"
         else
@@ -70,36 +71,37 @@ function functions.LoopActions(monster,  player)
         functions.printOpcoes()
 
         --Printa a pergunta e faz o imput da ação do player
-        print("Digite uma ação de 1 a 4: ")
+        io.write("Digite uma ação de 1 a 4: ")
         local action = io.read("*n")
+        print("\n              ↓ ↓ ↓ ↓ ↓ ↓")
 
         --Turno do jogador escolher uma ação--------------------------------
         if action == 1 then
-            monster.Health = monster.Health - 7
-            print(string.format(" ► Você desfere um golpe com sua espada no %s e causou %d de dano! ◄", monster.Name, 7))
-            print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
-            print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
-            print("========================")
+            --Calcula o valor que causará de dano levando em consideração o attack do jogador e a defesa do inimigo; E aplica o dano.
+            local rawDamage = player.attack - math.random() * monster.Defense
+            local damage = math.max(1, math.ceil(rawDamage))
+            monster.Health = monster.Health - damage
+
+            print(string.format(" ► Você desfere um golpe com sua espada no %s e causou %d de dano! ◄", monster.Name, damage))
         
         elseif action == 2 then
-            if player.health == player.maxhealth then
-                print("Sua vida ja está cheia!")
-            else
-                local heal = player.maxhealth - player.health
-                player.health = player.health + heal
-                print(string.format(" ► Você curou %d de vida! ◄", heal))
+            if player.potions >= 1 then
+                if player.health == player.maxhealth then
+                    print("Sua vida ja está cheia!")
+                else
+                    local heal = player.maxhealth - player.health
+                    player.health = player.health + heal
+                    print(string.format(" ► Você curou %d de vida! ◄", heal))
+                    player.potions = player.potions - 1
+                    print(string.format("Você tem %d de poções de vida.", player.potions))
+                end
+            else 
+                print(string.format("Você não possui poções para usar."))
             end
-
-            print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
-            print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
-            print("========================")
         
         elseif action == 3 then
             monster.Health = monster.Health - 3
             print(string.format(" ► Você atirou uma pedra na cabeça do %s e causou %d de dano! ◄", monster.Name, 3))
-            print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
-            print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
-            print("========================")
 
         elseif action == 4 then
             if player.health >= 5 then
@@ -119,33 +121,38 @@ function functions.LoopActions(monster,  player)
 
         -- Turno do monstro fazer uma jogada--------------------------------
         local ActionMonster = math.random(4)
-        
+
         if ActionMonster == 1 then
-            player.health = player.health - 2
-            print(string.format(" ► O %s mordeu e causou %d de dano a você! ◄",monster.Name, 2))
-            print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
-            print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
+            local rawDamage = monster.Attack - math.random() * player.defense
+            local damage = math.max(1, math.ceil(rawDamage))
+
+            player.health = player.health - damage
+            print(string.format(" ► O %s mordeu e causou %d de dano a você! ◄",monster.Name, damage))
+
+            print(string.format("HP %s →  %d / %d ► %s", player.name, player.health, player.maxhealth, functions.AttributeBar(player.health, player.maxhealth)))
+
+            print(string.format("HP %s →  %d / %d ► %s", monster.Name, monster.Health, monster.Maxhealth, functions.AttributeBar(monster.Health, monster.Maxhealth)))
             print("========================")
-        
+
         elseif ActionMonster == 2 then
             if monster.Health == monster.Maxhealth then
                 print(string.format("► A vida do %s está cheia! ◄",monster.Name))
             else
                 local monsterHealthNow = (monster.Maxhealth - monster.Health)
                 local porcentageHeal = (monsterHealthNow / 100 ) * 30
-                monster.Health = monster.Health + math.floor(porcentageHeal - 0.5)
+                monster.Health = monster.Health + math.floor(porcentageHeal + 0.5)              
                 print(string.format(" ► O %s curou %d de vida! ◄", monster.Name, math.floor(porcentageHeal - 0.5)))
             end
 
-            print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
-            print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
+            print(string.format("HP %s →  %d / %d ► %s", player.name, player.health, player.maxhealth, functions.AttributeBar(player.health, player.maxhealth)))
+            print(string.format("HP %s →  %d / %d ► %s", monster.Name, monster.Health, monster.Maxhealth, functions.AttributeBar(monster.Health, monster.Maxhealth)))
             print("========================")
         
         elseif ActionMonster == 3 then
-            player.health = player.health - 1
+            player.health = player.health - 2
             print(string.format(" ► O %s rugiu e causou %d de dano a você! ◄",monster.Name, 2))
-            print(string.format("HP %s →  %d / %d ", player.name, player.health, player.maxhealth))
-            print(string.format("HP %s →  %d / %d ", monster.Name, monster.Health, monster.Maxhealth))
+            print(string.format("HP %s →  %d / %d ► %s", player.name, player.health, player.maxhealth, functions.AttributeBar(player.health, player.maxhealth)))
+            print(string.format("HP %s →  %d / %d ► %s", monster.Name, monster.Health, monster.Maxhealth, functions.AttributeBar(monster.Health, monster.Maxhealth)))
             print("========================")
 
         elseif ActionMonster == 4 then
@@ -162,9 +169,6 @@ function functions.LoopActions(monster,  player)
             print(string.format("O %s foi derrotado! \n Você foi derrotado 😥",player.name))
             break
         end
-
-        
-
     end
 end
 
